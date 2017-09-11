@@ -27,6 +27,9 @@ private:
 
 // GLobal
 Card deck[52];
+int N = 0; // Total number of turns
+int T = 0; // the player winning the game transitioned four times
+double L = 0; // T/N
 
 // this will initialize the deck with 
 void initialize() { 
