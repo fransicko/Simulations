@@ -135,14 +135,7 @@ void sim_war() {
       hand_2.pop_back();
       draw_pile.clear();
 
-      if (T == 0) {
-        T += 1;
-        current_winner = 1;
-      }
-      else if (current_winner == 2) {
-        T += 1;
-        current_winner = 1;
-      }
+
     }
     else if (hand_2.back().mValue > hand_1.back().mValue) { // THis is player 2 win
       pile_2.push_back(hand_1.back());
@@ -154,14 +147,6 @@ void sim_war() {
       hand_2.pop_back();
       draw_pile.clear();
 
-      if (T == 0) {
-        T += 1;
-        current_winner = 2;
-      }
-      else if (current_winner == 1) {
-        T += 1;
-        current_winner = 2;
-      }     
 
     }
     else { // draw
@@ -178,6 +163,17 @@ void sim_war() {
       hand_1.insert(hand_1.end(), pile_1.begin(), pile_1.end());
       pile_1.clear();
       hand_shuffle(1);
+
+      if (pile_2.size() > pile_1.size()) {
+        if (T == 0) {
+          T += 1;
+          current_winner = 2;
+        }
+        else if (current_winner == 1) {
+          T += 1;
+          current_winner = 2;
+        } 
+      }    
     }
 
  
@@ -186,13 +182,22 @@ void sim_war() {
       hand_2.insert(hand_2.end(), pile_2.begin(), pile_2.end());
       pile_2.clear();
       hand_shuffle(2);
+      if (pile_1.size() > pile_2.size()) {
+        if (T == 0) {
+          T += 1;
+          current_winner = 1;
+        }
+        else if (current_winner == 2) {
+          T += 1;
+          current_winner = 1;
+        } 
+      }     
     }
   }
 }
 
 // Dealing hand to trash hands
 void tDeal(Card *player[], int hand, int hand_size) {
-  if (player[hand][0].mValue != 0) return;
   for (int i = 0; i < hand_size; ++i) {
     player[hand][i] = vDeck.back();
     vDeck.pop_back();
@@ -202,11 +207,26 @@ void tDeal(Card *player[], int hand, int hand_size) {
 // Did one of them win
 bool won(Card *player[], int hand, int hand_size) {
   for (int i=0; i < hand_size; ++i) {
-    if (player[hand][i].mValue != i+1 || palyer[hand][i].mValue != 11) return false;
+    if (player[hand][i].mValue != i+1 || player[hand][i].mValue != 11) return false;
   }
 
   return true;
 }
+
+// Reload teh vDeck
+void reload(Card *player[], int hand, int hand_size, stack<Card> &discard) {
+  Card empty;
+  for (int i=0; i < hand_size; ++i) {
+    player[hand][i].face_down = true;
+    vDeck.push_back(player[hand][i]);
+  }
+
+  while (!discard.empty()) {
+    vDeck.push_back(discard.top());
+    discard.pop();
+  }
+}
+
 
 // Trash simulations
 void sim_trash() {
@@ -246,7 +266,7 @@ void sim_trash() {
     vDeck.pop_back();
 
     // loop for the game
-    while (true) {
+    //while (true) {
       // We put the top discard in our hand for referance
       p1_card = discard.top();
       bool start_turn = true;
@@ -266,6 +286,7 @@ void sim_trash() {
                   swap(play_1[p1_hand][i], p1_card);
                   play_1[p1_hand][i].face_down = false;
                   discard.pop();
+                  cout << "We did a jack" << endl;
                   used_j = true;
                   break;
                 }
@@ -274,12 +295,14 @@ void sim_trash() {
             else { // else check if we can put in right spot
               if (play_1[p1_hand][p1_card.mValue-1].face_down) {
                 discard.pop();
+                cout << "p1 used a card: " << p1_card.mValue << endl;
                 p1_card.face_down = false; 
                 swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
                 p1_card.face_down = true;
               }
               else if (play_1[p1_hand][p1_card.mValue-1].mValue == 11) { // We will switch
                 discard.pop();
+                cout << "p1 switched the card: " << p1_card.mValue << endl;
                 p1_card.face_down = false; 
                 swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
                 p1_card.face_down = true;
@@ -287,12 +310,14 @@ void sim_trash() {
               else { // we draw from teh deck
                 p1_card = vDeck.back();
                 vDeck.pop_back();
+                cout << "p1 drawed a card: " << p1_card.mValue << endl;
               }
             }
           } // end o the if we can use the card statement
           else { // Else we will draw a card
             p1_card = vDeck.back();
             vDeck.pop_back();
+            cout << "we drew a card:" << p1_card.mValue << endl;
           }
           start_turn = false;
         } // end the of the first turn loop
@@ -308,6 +333,7 @@ void sim_trash() {
                 if (play_1[p1_hand][i].face_down) {
                   swap(play_1[p1_hand][i], p1_card);
                   play_1[p1_hand][i].face_down = false;
+                  cout << "turn two jack." << endl;
                   used_j = true;
                   break;
                 }
@@ -315,50 +341,64 @@ void sim_trash() {
             }
             else { // else check if we can put in right spot
               if (play_1[p1_hand][p1_card.mValue-1].face_down) {
+                cout << "turn 2 p1 card in right place: " << p1_card.mValue << endl;
                 p1_card.face_down = false; 
                 swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
                 p1_card.face_down = true;
               }
               else if (play_1[p1_hand][p1_card.mValue-1].mValue == 11) { // We will switch
+                cout << "turn 2 p1 we swapped a jack" << p1_card.mValue << endl;
                 p1_card.face_down = false; 
                 swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
                 p1_card.face_down = true;
               }
               else { // we discard the card
-                discard.push(p1_card);
-                break;
+                bool who_won = won(play_1, p1_hand, p1_hand_size);
+                if (who_won) {
+                  if (T == 0) {
+                    T += 1;
+                    current_winner = 1;
+
+                  }
+                  else if (current_winner == 2) {
+                    T += 1;
+                    current_winner = 1;
+                  }
+                  
+                  // put all the cards in the discard pile and hand into the deck
+                  reload(play_1, p1_hand, p1_hand_size, discard);
+                  p1_hand++;
+                  p1_hand_size--; 
+                  tDeal(play_1, p1_hand, p1_hand_size);
+                }
+                else {
+                  discard.push(p1_card);
+                  cout << "turn 2 p1 usless card." << p1_card.mValue << endl;
+                  break;
+                }
               }
             }
           } // end o the if we can use the card statement
           else { // Else we will draw a card
             discard.push(p1_card);
+            cout << "turn 2 THe usless card is " << p1_card.mValue << endl;
             break;
           }
         }
       } // End player 1 while loop
 
+      cout << "PLayer ones turn is over." << endl << endl;
       // We need to check if player 1 has a full array
-      bool who_won = won(play_1, p1_hand, p1_hand_size);
-      if (who_won) {
-        if (T == 0) {
-          T += 1;
-          current_winner = 1;
+      
+      ++N;
 
-        }
-        else if (current_winner == 2) {
-          T += 1;
-          current_winner = 1;
-        }
-        p1_hand++;
-        p1_hand_size--;
-        tDeal(play_1, p1_hand, p1_hand_size);
-        break;
-      }
-
+      // reinitialize the discard pile
+      discard.push(vDeck.back());
+      vDeck.pop_back();
       // We put the top discard in our hand for referance
       p2_card = discard.top();
-      bool start_turn = true;
-      // loop for player 1 turn
+      start_turn = true;
+      // loop for player 2 turn
       while (true) {
         // We start the turn
         if (start_turn) {
@@ -370,9 +410,9 @@ void sim_trash() {
               bool used_j = false;
               // put in the next open spot
               for (int i = 0; i < p2_hand_size; ++i) {
-                if (play_2[p1_hand][i].face_down) {
+                if (play_2[p2_hand][i].face_down) {
                   swap(play_2[p2_hand][i], p2_card);
-                  play_2[p1_hand][i].face_down = false;
+                  play_2[p2_hand][i].face_down = false;
                   discard.pop();
                   used_j = true;
                   break;
@@ -415,7 +455,7 @@ void sim_trash() {
               for (int i = 0; i < p2_hand_size; ++i) {
                 if (play_2[p2_hand][i].face_down) {
                   swap(play_2[p2_hand][i], p2_card);
-                  play_2[p1_hand][i].face_down = false;
+                  play_2[p2_hand][i].face_down = false;
                   used_j = true;
                   break;
                 }
@@ -433,8 +473,28 @@ void sim_trash() {
                 p2_card.face_down = true;
               }
               else { // we discard the card
-                discard.push(p2_card);
-                break;
+                bool who_won = won(play_2, p2_hand, p2_hand_size);
+                if (who_won) {
+                  if (T == 0) {
+                    T += 1;
+                    current_winner = 2;
+
+                  }
+                  else if (current_winner == 1) {
+                    T += 1;
+                    current_winner = 2;
+                  }
+                  
+                  // put all the cards in the discard pile and hand into the deck
+                  reload(play_2, p2_hand, p2_hand_size, discard);
+                  p2_hand++;
+                  p2_hand_size--; 
+                  tDeal(play_2, p2_hand, p2_hand_size);
+                }
+                else {
+                  discard.push(p2_card);
+                  break;
+                }
               }
             }
           } // end o the if we can use the card statement
@@ -444,25 +504,11 @@ void sim_trash() {
           }
         }
       }
-      // check if player 2 has a full array
-      who_won = won(play_2, p2_hand, p2_hand_size);
-      if (who_won) {
-        if (T == 0) {
-          T += 1;
-          current_winner = 2;
-        }
-        else if (current_winner == 1) {
-          T += 1;
-          current_winner = 2;
-        }
-        p2_hand++;
-        p2_hand_size--;
-        tDeal(play_2, p2_hand, p2_hand_size);
-        break;
-      }
+      ++N;
+      cout << "PLayer 2 turn is over." << endl;
+    //} // end the current hand while loop
 
 
-    } // end the current hand while loop
   } // end the game loop
 }
 
