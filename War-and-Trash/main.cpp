@@ -278,12 +278,10 @@ void sim_trash() {
       bool start_turn = true;
       // loop for player 1 turn
       while (true) {
-
-
+        // We start the turn
         if (start_turn) {
-        // Check if we can use the discard card
-        if (p1_card.mValue <= p1_hand_size || p1_card.mValue == 11) {
-          
+          // Check if we can use the discard card
+          if (p1_card.mValue <= p1_hand_size || p1_card.mValue == 11) {
             // check if we can use it
             // check joker
             if (p1_card.mValue == 11) {
@@ -313,15 +311,14 @@ void sim_trash() {
 
               }
             }
-        }
-        else { // Else we will draw a card
-          p1_card = vDeck.back();
-          vDeck.pop_back();
-        }
-        start_turn = false;
-        }
-        // end the of the first turn loop
-        else if (!start_turn) {
+          } // end o the if we can use the card statement
+          else { // Else we will draw a card
+            p1_card = vDeck.back();
+            vDeck.pop_back();
+          }
+          start_turn = false;
+        } // end the of the first turn loop
+        else if (!start_turn) { // we have a card in hand and are trying to switch it with a card in the array
 
         }
       } // End player 1 while loop
