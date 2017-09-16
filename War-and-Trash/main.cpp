@@ -422,12 +422,14 @@ void sim_trash() {
             else { // else check if we can put in right spot
               if (play_2[p2_hand][p2_card.mValue-1].face_down) {
                 discard.pop();
+                cout << "p2 used a card: " << p1_card.mValue << endl;
                 p2_card.face_down = false; 
                 swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
                 p2_card.face_down = true;
               }
               else if (play_2[p2_hand][p2_card.mValue-1].mValue == 11) { // We will switch
                 discard.pop();
+                cout << "p2 switched the card: " << p1_card.mValue << endl;
                 p2_card.face_down = false; 
                 swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
                 p2_card.face_down = true;
@@ -435,12 +437,14 @@ void sim_trash() {
               else { // we draw from teh deck
                 p2_card = vDeck.back();
                 vDeck.pop_back();
+                cout << "p2 drawed a card: " << p1_card.mValue << endl;
               }
             }
           } // end o the if we can use the card statement
           else { // Else we will draw a card
             p2_card = vDeck.back();
             vDeck.pop_back();
+            cout << "p2 drawed a card: " << p1_card.mValue << endl;
           }
           start_turn = false;
         } // end the of the first turn loop
@@ -463,11 +467,13 @@ void sim_trash() {
             }
             else { // else check if we can put in right spot
               if (play_2[p2_hand][p2_card.mValue-1].face_down) {
+                cout << "turn 2 p2 card in right place: " << p1_card.mValue << endl;
                 p2_card.face_down = false; 
                 swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
                 p2_card.face_down = true;
               }
               else if (play_2[p2_hand][p2_card.mValue-1].mValue == 11) { // We will switch
+                cout << "turn 2 p2 we swapped a jack" << p1_card.mValue << endl;
                 p2_card.face_down = false; 
                 swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
                 p2_card.face_down = true;
@@ -492,6 +498,7 @@ void sim_trash() {
                   tDeal(play_2, p2_hand, p2_hand_size);
                 }
                 else {
+                  cout << "turn 2 p2 usless card." << p1_card.mValue << endl;
                   discard.push(p2_card);
                   break;
                 }
@@ -500,6 +507,7 @@ void sim_trash() {
           } // end o the if we can use the card statement
           else { // Else we will draw a card
             discard.push(p2_card);
+            cout << "turn 2 p2 usless card." << p1_card.mValue << endl;
             break;
           }
         }
