@@ -202,7 +202,7 @@ void tDeal(Card *player[], int hand, int hand_size) {
 // Did one of them win
 bool won(Card *player[], int hand, int hand_size) {
   for (int i=0; i < hand_size; ++i) {
-    if (player[hand][i].mValue != i+1) return false;
+    if (player[hand][i].mValue != i+1 || palyer[hand][i].mValue != 11) return false;
   }
 
   return true;
@@ -234,45 +234,19 @@ void sim_trash() {
   Card p1_card;
   Card p2_card;
 
+  // filling hands
+  tDeal(play_1, p1_hand, p1_hand_size);
+  tDeal(play_2, p2_hand, p2_hand_size);
+
   // Needs an ace to win
   // loop for the hand
   while (play_1[9][0].mValue == 0 && play_2[9][0].mValue == 0) {
-    // filling hands
-    tDeal(play_1, p1_hand, p1_hand_size);
-    tDeal(play_2, p2_hand, p2_hand_size);
-
     // Put the top card into the stack
     discard.push(vDeck.back());
     vDeck.pop_back();
 
     // loop for the game
     while (true) {
-      bool who_won = won(play_1, p1_hand, p1_hand_size);
-      if (who_won) {
-        if (T == 0) {
-          T += 1;
-          current_winner = 1;
-        }
-        else if (current_winner == 2) {
-          T += 1;
-          current_winner = 1;
-        }
-        break;
-      }
-
-      who_won = won(play_2, p2_hand, p2_hand_size);
-      if (who_won) {
-        if (T == 0) {
-          T += 1;
-          current_winner = 2;
-        }
-        else if (current_winner == 1) {
-          T += 1;
-          current_winner = 2;
-        }
-        break;
-      }
-
       // We put the top discard in our hand for referance
       p1_card = discard.top();
       bool start_turn = true;
@@ -281,6 +255,49 @@ void sim_trash() {
         // We start the turn
         if (start_turn) {
           // Check if we can use the discard card
+          if (p1_card.mValue <= p1_hand_size || p1_card.mValue == 11) {
+            // check if we can use it
+            // check joker
+            if (p1_card.mValue == 11) {
+              bool used_j = false;
+              // put in the next open spot
+              for (int i = 0; i < p1_hand_size; ++i) {
+                if (play_1[p1_hand][i].face_down) {
+                  swap(play_1[p1_hand][i], p1_card);
+                  play_1[p1_hand][i].face_down = false;
+                  discard.pop();
+                  used_j = true;
+                  break;
+                }
+              } // end for loop
+            }
+            else { // else check if we can put in right spot
+              if (play_1[p1_hand][p1_card.mValue-1].face_down) {
+                discard.pop();
+                p1_card.face_down = false; 
+                swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
+                p1_card.face_down = true;
+              }
+              else if (play_1[p1_hand][p1_card.mValue-1].mValue == 11) { // We will switch
+                discard.pop();
+                p1_card.face_down = false; 
+                swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
+                p1_card.face_down = true;
+              }
+              else { // we draw from teh deck
+                p1_card = vDeck.back();
+                vDeck.pop_back();
+              }
+            }
+          } // end o the if we can use the card statement
+          else { // Else we will draw a card
+            p1_card = vDeck.back();
+            vDeck.pop_back();
+          }
+          start_turn = false;
+        } // end the of the first turn loop
+        else if (!start_turn) { // we have a card in hand and are trying to switch it with a card in the array
+          // DOn't worry about discrad pile / we have a card in hand
           if (p1_card.mValue <= p1_hand_size || p1_card.mValue == 11) {
             // check if we can use it
             // check joker
@@ -307,21 +324,144 @@ void sim_trash() {
                 swap(play_1[p1_hand][p1_card.mValue-1], p1_card);
                 p1_card.face_down = true;
               }
-              else { // we draw from teh deck
-
+              else { // we discard the card
+                discard.push(p1_card);
+                break;
               }
             }
           } // end o the if we can use the card statement
           else { // Else we will draw a card
-            p1_card = vDeck.back();
+            discard.push(p1_card);
+            break;
+          }
+        }
+      } // End player 1 while loop
+
+      // We need to check if player 1 has a full array
+      bool who_won = won(play_1, p1_hand, p1_hand_size);
+      if (who_won) {
+        if (T == 0) {
+          T += 1;
+          current_winner = 1;
+
+        }
+        else if (current_winner == 2) {
+          T += 1;
+          current_winner = 1;
+        }
+        p1_hand++;
+        p1_hand_size--;
+        tDeal(play_1, p1_hand, p1_hand_size);
+        break;
+      }
+
+      // We put the top discard in our hand for referance
+      p2_card = discard.top();
+      bool start_turn = true;
+      // loop for player 1 turn
+      while (true) {
+        // We start the turn
+        if (start_turn) {
+          // Check if we can use the discard card
+          if (p2_card.mValue <= p2_hand_size || p2_card.mValue == 11) {
+            // check if we can use it
+            // check joker
+            if (p2_card.mValue == 11) {
+              bool used_j = false;
+              // put in the next open spot
+              for (int i = 0; i < p2_hand_size; ++i) {
+                if (play_2[p1_hand][i].face_down) {
+                  swap(play_2[p2_hand][i], p2_card);
+                  play_2[p1_hand][i].face_down = false;
+                  discard.pop();
+                  used_j = true;
+                  break;
+                }
+              } // end for loop
+            }
+            else { // else check if we can put in right spot
+              if (play_2[p2_hand][p2_card.mValue-1].face_down) {
+                discard.pop();
+                p2_card.face_down = false; 
+                swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
+                p2_card.face_down = true;
+              }
+              else if (play_2[p2_hand][p2_card.mValue-1].mValue == 11) { // We will switch
+                discard.pop();
+                p2_card.face_down = false; 
+                swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
+                p2_card.face_down = true;
+              }
+              else { // we draw from teh deck
+                p2_card = vDeck.back();
+                vDeck.pop_back();
+              }
+            }
+          } // end o the if we can use the card statement
+          else { // Else we will draw a card
+            p2_card = vDeck.back();
             vDeck.pop_back();
           }
           start_turn = false;
         } // end the of the first turn loop
         else if (!start_turn) { // we have a card in hand and are trying to switch it with a card in the array
-
+          // DOn't worry about discrad pile / we have a card in hand
+          if (p2_card.mValue <= p2_hand_size || p2_card.mValue == 11) {
+            // check if we can use it
+            // check joker
+            if (p2_card.mValue == 11) {
+              bool used_j = false;
+              // put in the next open spot
+              for (int i = 0; i < p2_hand_size; ++i) {
+                if (play_2[p2_hand][i].face_down) {
+                  swap(play_2[p2_hand][i], p2_card);
+                  play_2[p1_hand][i].face_down = false;
+                  used_j = true;
+                  break;
+                }
+              } // end for loop
+            }
+            else { // else check if we can put in right spot
+              if (play_2[p2_hand][p2_card.mValue-1].face_down) {
+                p2_card.face_down = false; 
+                swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
+                p2_card.face_down = true;
+              }
+              else if (play_2[p2_hand][p2_card.mValue-1].mValue == 11) { // We will switch
+                p2_card.face_down = false; 
+                swap(play_2[p2_hand][p2_card.mValue-1], p2_card);
+                p2_card.face_down = true;
+              }
+              else { // we discard the card
+                discard.push(p2_card);
+                break;
+              }
+            }
+          } // end o the if we can use the card statement
+          else { // Else we will draw a card
+            discard.push(p2_card);
+            break;
+          }
         }
-      } // End player 1 while loop
+      }
+      // check if player 2 has a full array
+      who_won = won(play_2, p2_hand, p2_hand_size);
+      if (who_won) {
+        if (T == 0) {
+          T += 1;
+          current_winner = 2;
+        }
+        else if (current_winner == 1) {
+          T += 1;
+          current_winner = 2;
+        }
+        p2_hand++;
+        p2_hand_size--;
+        tDeal(play_2, p2_hand, p2_hand_size);
+        break;
+      }
+
+
     } // end the current hand while loop
   } // end the game loop
 }
