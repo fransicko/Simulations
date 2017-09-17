@@ -51,7 +51,7 @@ void swap (Card &a, Card &b) {
   b = c;
 }
 
-
+// Fisher - Yates Code here
 void shuffle() {
   int c = 0;
   while ( c < 51 ) {
@@ -63,6 +63,7 @@ void shuffle() {
   }
 }
 
+// shuffle player hands
 void hand_shuffle(int hand) {
   int c = 0;
   int n = 0;
@@ -766,7 +767,8 @@ int main(int argc, char** argv) {
   inFile.open(file.c_str());
 
   if (!inFile) {
-    cerr << "WTF";
+    cerr << "File does not exist" << endl;
+    return 1;
   }
 
   inFile >> r;
