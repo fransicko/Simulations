@@ -779,6 +779,10 @@ int main(int argc, char** argv) {
   else if (game == "trash") {
     sim_trash();
   }
+  else {
+    cerr << "No game specified." << endl;
+    return 1;
+  }
   
   inFile.close();
 
